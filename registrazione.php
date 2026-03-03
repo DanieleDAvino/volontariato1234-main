@@ -45,6 +45,44 @@ $areaDescrizione = match($area) {
     default          => $area
 };
 
+// ── SALVATAGGIO NEL DATABASE ────────────────────────────────
+$db_host = 'localhost';
+$db_name = 'volontariato';
+$db_user = 'root';       // utente di default in XAMPP
+$db_pass = '';           // password vuota di default in XAMPP
+
+try {
+    $pdo = new PDO(
+        "mysql:host=$db_host;dbname=$db_name;charset=utf8",
+        $db_user,
+        $db_pass
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $sql = "INSERT INTO registrazioni (nome, email, telefono, eta, area, disponibilita, esperienze, motivazione)
+            VALUES (:nome, :email, :telefono, :eta, :area, :disponibilita, :esperienze, :motivazione)";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':nome'          => $nome,
+        ':email'         => $email,
+        ':telefono'      => $telefono,
+        ':eta'           => $eta,
+        ':area'          => $area,
+        ':disponibilita' => $disponibilita,
+        ':esperienze'    => $esperienze,
+        ':motivazione'   => $motivazione
+    ]);
+
+} catch (PDOException $e) {
+    echo json_encode([
+        'successo' => false,
+        'messaggio' => 'Errore nel salvataggio dei dati.',
+        'debug' => $e->getMessage()
+    ]);
+    exit;
+}
+
 try {
     $mail = new PHPMailer(true);
 
@@ -124,8 +162,8 @@ try {
     $errore = $mail->ErrorInfo;
     error_log("PHPMailer error: " . $errore);
     echo json_encode([
-        'successo' => false,
-        'messaggio' => 'Errore invio email.',
+        'successo' => true,
+        'messaggio' => 'Registrazione salvata! (Invio email non riuscito, ti contatteremo noi)',
         'debug' => $errore
     ]);
 }
