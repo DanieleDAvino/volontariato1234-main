@@ -18,7 +18,9 @@ function pulisci($dato) {
 }
 
 $nome          = pulisci($_POST['nome']          ?? '');
+$cognome       = pulisci($_POST['cognome']       ?? '');
 $email         = pulisci($_POST['email']         ?? '');
+$psswd         = pulisci($_POST['psswd']         ?? '');
 $telefono      = pulisci($_POST['telefono']      ?? '');
 $eta           = pulisci($_POST['eta']           ?? '');
 $area          = pulisci($_POST['area']          ?? '');
@@ -45,11 +47,11 @@ $areaDescrizione = match($area) {
     default          => $area
 };
 
-// ── SALVATAGGIO NEL DATABASE ────────────────────────────────
+//db
 $db_host = 'localhost';
 $db_name = 'volontariato';
-$db_user = 'root';       // utente di default in XAMPP
-$db_pass = '';           // password vuota di default in XAMPP
+$db_user = 'root';       
+$db_pass = '';           
 
 try {
     $pdo = new PDO(
@@ -59,13 +61,15 @@ try {
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $sql = "INSERT INTO registrazioni (nome, email, telefono, eta, area, disponibilita, esperienze, motivazione)
-            VALUES (:nome, :email, :telefono, :eta, :area, :disponibilita, :esperienze, :motivazione)";
+    $sql = "INSERT INTO registrazioni (nome, cognome, email, psswd, telefono, eta, area, disponibilita, esperienze, motivazione)
+            VALUES (:nome, :cognome, :email, :psswd, :telefono, :eta, :area, :disponibilita, :esperienze, :motivazione)";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':nome'          => $nome,
+        ':cognome'       => $cognome,
         ':email'         => $email,
+        ':psswd'         => $psswd,
         ':telefono'      => $telefono,
         ':eta'           => $eta,
         ':area'          => $area,
@@ -83,6 +87,7 @@ try {
     exit;
 }
 
+//emial
 try {
     $mail = new PHPMailer(true);
 
